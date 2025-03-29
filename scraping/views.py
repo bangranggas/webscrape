@@ -34,7 +34,7 @@ def scrape_drive_data():
         # Mengambil data dari elemen-elemen
         album_title = h3_elements[i].get_text(strip=True)
         preview_images = [img_elements[i*2]['src'], img_elements[i*2+1]['src']]  # 2 gambar untuk setiap album
-        drive_link = a_elements[i]['href'] if a_elements[i].get('href') else "No Link"
+        drive_link = a_elements[i].get_text(strip=True) if a_elements[i].get_text(strip=True) else "No Text"
 
         # Menyusun album dalam format yang sesuai
         albums[album_count] = {
@@ -101,7 +101,7 @@ def scrape_of_data():
             # Periksa semua <a> setelah <h3> yang relevan dan tambahkan ke dalam list link
             for link in a_elements:
                 if link.find_previous("h3") == h3_elements[album_index]:
-                    album_links.append(link.get('href', 'No Link'))
+                    album_links.append(link.get_text(strip=True))
 
             # Menyusun album dalam format yang sesuai
             categories[category_name][album_count] = {
