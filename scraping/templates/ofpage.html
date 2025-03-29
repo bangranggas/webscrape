@@ -248,7 +248,7 @@
 
     <script>
       // Fetch data from the Django backend
-      fetch('http://127.0.0.1:8000/scrape-data-of/')
+      fetch('/scrape-data-of')
         .then((response) => response.json())
         .then((data) => {
           const albumContainer = document.getElementById('album-container');

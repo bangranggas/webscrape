@@ -239,7 +239,7 @@
 
     <script>
       // Fetch data from the Django backend
-      fetch('http://127.0.0.1:8000/scrape-data-drive/')
+      fetch('/scrape-data-drive')
         .then((response) => response.json())
         .then((data) => {
           const albumList = document.getElementById('album-list');
