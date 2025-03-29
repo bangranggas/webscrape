@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>GDrive Albums</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary-color: #6a4c93;
+        --secondary-color: #1982c4;
+        --accent-color: #8ac926;
+        --dark-color: #333333;
+        --light-color: #f4f4f4;
+        --secondary-color-rgb: 25, 130, 196;
+      }
+
+      body {
+        background-color: #e9ecef;
+        padding-top: 76px;
+        font-family: 'Roboto', Arial, sans-serif;
+        color: var(--dark-color);
+      }
+      .album {
+        margin-bottom: 20px;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        background-color: white;
+        transition: all 0.4s ease;
+        height: 450px;
+        display: flex;
+        flex-direction: column;
+        border: 2px solid var(--light-color);
+      }
+
+      .album:hover {
+        transform: scale(1.03);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.18);
+      }
+
+      .album-content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+      .album-title {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 15px;
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-bottom: 4px solid var(--accent-color);
+      }
+
+      .carousel-container {
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+      }
+      .carousel-item img {
+        width: 100%;
+        height: auto;
+        max-height: 350px;
+        object-fit: contain;
+        background-color: #f8f9fa;
+      }
+      .carousel-control-prev,
+      .carousel-control-next {
+        width: 50px;
+        height: 50px;
+        background-color: rgba(var(--secondary-color-rgb, 25, 130, 196), 0.7);
+        border-radius: 50%;
+        top: 50%;
+        transform: translateY(-50%);
+        transition: background-color 0.3s ease;
+      }
+      .carousel-control-prev:hover,
+      .carousel-control-next:hover {
+        background-color: rgba(var(--secondary-color-rgb, 25, 130, 196), 0.9);
+      }
+      .carousel-control-prev-icon,
+      .carousel-control-next-icon {
+        width: 30px;
+        height: 30px;
+      }
+      .album-footer {
+        padding: 15px;
+        display: flex;
+        justify-content: center;
+        background-color: var(--light-color);
+      }
+      .drive-link {
+        background-color: var(--secondary-color);
+        color: white;
+        padding: 10px 25px;
+        border-radius: 25px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        font-weight: 500;
+      }
+      .drive-link:hover {
+        background-color: var(--accent-color);
+        transform: translateY(-3px);
+        color: var(--dark-color);
+      }
+      .drive-link i {
+        margin-right: 10px;
+      }
+      .page-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        text-align: center;
+        padding: 40px 0;
+        margin-bottom: 30px;
+        margin-top: 20px;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      .page-header h1 {
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 15px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .page-header .lead {
+        font-weight: 300;
+        font-size: 1.2rem;
+        opacity: 0.9;
+      }
+      .navbar {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+      }
+
+      .nav-link {
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+        padding: 0.5rem 1rem;
+        margin: 0 0.2rem;
+        border-radius: 4px;
+        transition: all 0.3s;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .nav-link:hover,
+      .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+      }
+      .mb-4 {
+        margin-bottom: 1rem !important;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+      <div class="container">
+        <a
+          class="navbar-brand"
+          href="#"
+        >
+          <i class="bi bi-collection-play me-2"></i> <span style="font-weight: bold">My Collection</span>
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div
+          class="collapse navbar-collapse"
+          id="navbarNav"
+        >
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a
+                class="nav-link active"
+                aria-current="page"
+                href="{% url 'scraping:show_webdrive' %}"
+                >Gdrive</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="{% url 'scraping:show_webof' %}"
+                >OF</a
+              >
+            </li>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="page-header">
+        <h1>GDrive Albums</h1>
+        <p class="lead">A collection from our google drive</p>
+      </div>
+
+      <div
+        class="row"
+        id="album-list"
+      >
+        <!-- Albums will be inserted here by JavaScript -->
+      </div>
+    </div>
+
+    <!-- Bootstrap JavaScript and dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      // Fetch data from the Django backend
+      fetch('http://127.0.0.1:8000/scrape-data-drive/')
+        .then((response) => response.json())
+        .then((data) => {
+          const albumList = document.getElementById('album-list');
+
+          // Iterate through each album in the data
+          for (const [albumId, album] of Object.entries(data)) {
+            // Create the album structure
+            const albumCol = document.createElement('div');
+            albumCol.classList.add('col-md-6', 'col-lg-4', 'mb-4');
+
+            const albumDiv = document.createElement('div');
+            albumDiv.classList.add('album');
+
+            const albumContent = document.createElement('div');
+            albumContent.classList.add('album-content');
+
+            // Title
+            const title = document.createElement('h3');
+            title.classList.add('album-title');
+            title.textContent = album.title;
+            albumContent.appendChild(title);
+
+            // Create carousel container
+            const carouselContainer = document.createElement('div');
+            carouselContainer.classList.add('carousel-container');
+
+            // Create carousel for preview images
+            const carouselId = `carousel-${albumId}`;
+            const carouselDiv = document.createElement('div');
+            carouselDiv.id = carouselId;
+            carouselDiv.classList.add('carousel', 'slide');
+            carouselDiv.setAttribute('data-bs-ride', 'carousel');
+
+            // Carousel indicators
+            const indicatorsDiv = document.createElement('div');
+            indicatorsDiv.classList.add('carousel-indicators');
+
+            // Carousel inner to hold slides
+            const carouselInner = document.createElement('div');
+            carouselInner.classList.add('carousel-inner');
+
+            // Add images to carousel
+            album.preview.forEach((src, index) => {
+              // Create indicator button
+              const indicator = document.createElement('button');
+              indicator.setAttribute('type', 'button');
+              indicator.setAttribute('data-bs-target', `#${carouselId}`);
+              indicator.setAttribute('data-bs-slide-to', index);
+              if (index === 0) {
+                indicator.classList.add('active');
+              }
+              indicatorsDiv.appendChild(indicator);
+
+              // Create slide
+              const slide = document.createElement('div');
+              slide.classList.add('carousel-item');
+              if (index === 0) {
+                slide.classList.add('active');
+              }
+
+              const img = document.createElement('img');
+              img.src = src;
+              img.classList.add('d-block');
+              img.alt = `Preview Image ${index + 1}`;
+
+              slide.appendChild(img);
+              carouselInner.appendChild(slide);
+            });
+
+            // Add controls to carousel
+            const prevControl = document.createElement('button');
+            prevControl.classList.add('carousel-control-prev');
+            prevControl.setAttribute('type', 'button');
+            prevControl.setAttribute('data-bs-target', `#${carouselId}`);
+            prevControl.setAttribute('data-bs-slide', 'prev');
+            prevControl.innerHTML = `
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        `;
+
+            const nextControl = document.createElement('button');
+            nextControl.classList.add('carousel-control-next');
+            nextControl.setAttribute('type', 'button');
+            nextControl.setAttribute('data-bs-target', `#${carouselId}`);
+            nextControl.setAttribute('data-bs-slide', 'next');
+            nextControl.innerHTML = `
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        `;
+
+            // Assemble carousel
+            carouselDiv.appendChild(indicatorsDiv);
+            carouselDiv.appendChild(carouselInner);
+            carouselDiv.appendChild(prevControl);
+            carouselDiv.appendChild(nextControl);
+
+            carouselContainer.appendChild(carouselDiv);
+            albumContent.appendChild(carouselContainer);
+
+            // Link to Drive
+            const footerDiv = document.createElement('div');
+            footerDiv.classList.add('album-footer');
+
+            const link = document.createElement('a');
+            link.href = album.link;
+            link.classList.add('drive-link');
+            link.innerHTML = '<i class="bi bi-google"></i> Link to Drive';
+            link.target = '_blank';
+
+            footerDiv.appendChild(link);
+            albumContent.appendChild(footerDiv);
+
+            // Add content to album and album to column
+            albumDiv.appendChild(albumContent);
+            albumCol.appendChild(albumDiv);
+            albumList.appendChild(albumCol);
+          }
+
+          // Initialize all carousels
+          const carousels = document.querySelectorAll('.carousel');
+          carousels.forEach((carousel) => {
+            new bootstrap.Carousel(carousel, {
+              interval: 5000,
+              pause: 'hover',
+            });
+          });
+        })
+        .catch((error) => {
+          console.error('Error fetching data: ', error);
+          const albumList = document.getElementById('album-list');
+          albumList.innerHTML = `
+        <div class="col-12 text-center">
+          <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle"></i> 
+            Error loading albums. Please check your connection to the server.
+          </div>
+        </div>
+      `;
+        });
+    </script>
+  </body>
+</html>
