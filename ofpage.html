@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>OF Albums</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary-color: #2a9d8f;
+        --secondary-color: #e76f51;
+        --accent-color: #264653;
+        --dark-color: #264653;
+        --light-color: #f1faee;
+        --secondary-color-rgb: 231, 111, 81;
+      }
+
+      body {
+        background-color: #e9f5f2;
+        padding-top: 76px;
+        font-family: 'Montserrat', Arial, sans-serif;
+        color: var(--dark-color);
+      }
+      .album {
+        margin-bottom: 20px;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        background-color: white;
+        transition: all 0.4s ease;
+        height: 450px;
+        display: flex;
+        flex-direction: column;
+        border: 2px solid var(--light-color);
+      }
+
+      .album:hover {
+        transform: scale(1.03);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.18);
+      }
+
+      .album-content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+      .category-header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 15px;
+        margin-bottom: 20px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+        border-radius: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .album-title {
+        background-color: var(--accent-color);
+        color: white;
+        padding: 15px;
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-bottom: 4px solid var(--secondary-color);
+      }
+
+      .carousel-container {
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+      }
+      .carousel-item img {
+        width: 100%;
+        height: auto;
+        max-height: 350px;
+        object-fit: contain;
+        background-color: #f8f9fa;
+      }
+      .carousel-control-prev,
+      .carousel-control-next {
+        width: 50px;
+        height: 50px;
+        background-color: rgba(var(--secondary-color-rgb, 231, 111, 81), 0.7);
+        border-radius: 50%;
+        top: 50%;
+        transform: translateY(-50%);
+        transition: background-color 0.3s ease;
+      }
+      .carousel-control-prev:hover,
+      .carousel-control-next:hover {
+        background-color: rgba(var(--secondary-color-rgb, 231, 111, 81), 0.9);
+      }
+      .carousel-control-prev-icon,
+      .carousel-control-next-icon {
+        width: 30px;
+        height: 30px;
+      }
+      .album-footer {
+        padding: 15px;
+        display: flex;
+        justify-content: center;
+        background-color: var(--light-color);
+      }
+      .drive-link {
+        background-color: var(--secondary-color);
+        color: white;
+        padding: 10px 25px;
+        border-radius: 25px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        font-weight: 500;
+      }
+      .drive-link:hover {
+        background-color: var(--accent-color);
+        transform: translateY(-3px);
+        color: white;
+      }
+      .drive-link i {
+        margin-right: 10px;
+      }
+      .page-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        color: white;
+        text-align: center;
+        padding: 40px 0;
+        margin-bottom: 30px;
+        margin-top: 20px;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      .page-header h1 {
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 15px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .page-header .lead {
+        font-weight: 300;
+        font-size: 1.2rem;
+        opacity: 0.9;
+      }
+      .navbar {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        background: linear-gradient(to right, var(--accent-color), var(--primary-color));
+      }
+
+      .nav-link {
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+        padding: 0.5rem 1rem;
+        margin: 0 0.2rem;
+        border-radius: 4px;
+        transition: all 0.3s;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .nav-link:hover,
+      .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+      }
+      .mb-4 {
+        margin-bottom: 1rem !important;
+      }
+      
+      /* Pagination styles */
+      .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin: 30px 0;
+      }
+      
+      .pagination {
+        background-color: white;
+        border-radius: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      
+      .page-item .page-link {
+        color: var(--dark-color);
+        border: none;
+        font-weight: 500;
+        padding: 10px 20px;
+        transition: all 0.3s ease;
+      }
+      
+      .page-item.active .page-link {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+      }
+      
+      .page-item .page-link:hover {
+        background-color: var(--light-color);
+        color: var(--dark-color);
+      }
+      
+      /* Loader styles */
+      .loader-container {
+        display: flex;
+        justify-content: center;
+        margin: 30px 0;
+      }
+      
+      .loader {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      /* Category navigation */
+      .category-nav {
+        background-color: white;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 10px;
+      }
+      
+      .category-nav .nav-link {
+        color: var(--dark-color);
+        padding: 8px 15px;
+        border-radius: 20px;
+        margin: 0 5px;
+        font-weight: 500;
+      }
+      
+      .category-nav .nav-link.active {
+        background-color: var(--primary-color);
+        color: white;
+      }
+      
+      /* Search input */
+      .search-container {
+        margin-bottom: 20px;
+      }
+      
+      .search-input {
+        border-radius: 30px;
+        padding: 10px 20px;
+        border: 2px solid var(--light-color);
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      }
+      
+      .search-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+      <div class="container">
+        <a
+          class="navbar-brand"
+          href="#"
+        >
+          <i class="bi bi-collection-play me-2"></i> <span style="font-weight: bold">My Collection</span>
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div
+          class="collapse navbar-collapse"
+          id="navbarNav"
+        >
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="{% url 'scraping:show_webdrive' %}"
+                >GDrive</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link active"
+                aria-current="page"
+                href="{% url 'scraping:show_webof' %}"
+                >OF</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="{% url 'scraping:show_webofsearch' %}"
+                >OF Search</a
+              >
+            </li>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="page-header">
+        <h1>OF Albums</h1>
+        <p class="lead">A OF collection that we have</p>
+      </div>
+      
+      <!-- Search Box -->
+      <div class="search-container mb-4">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="text" id="search-input" class="form-control search-input" placeholder="Search albums by title...">
+        </div>
+      </div>
+      
+      <!-- Category Navigation -->
+      <div id="category-nav" class="category-nav">
+        <ul class="nav justify-content-center">
+          <li class="nav-item">
+            <a class="nav-link active" href="#" data-category="all">All Categories</a>
+          </li>
+          <!-- Additional category links will be added here by JavaScript -->
+        </ul>
+      </div>
+
+      <!-- Albums container -->
+      <div id="album-container">
+        <!-- Albums will be inserted here by JavaScript -->
+      </div>
+      
+      <!-- Loader -->
+      <div class="loader-container" id="loader">
+        <div class="loader"></div>
+      </div>
+      
+      <!-- Pagination -->
+      <div class="pagination-container">
+        <ul class="pagination" id="pagination">
+          <!-- Pagination will be inserted here by JavaScript -->
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bootstrap JavaScript and dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      // Global variables
+      const ITEMS_PER_PAGE = 9; // Number of albums per page
+      let allData = {}; // Store all the data
+      let currentPage = 1; // Current page
+      let totalPages = 1; // Total pages
+      let currentCategory = 'all'; // Current selected category
+      let isLoading = false; // Loading state flag
+      let searchTerm = ''; // Current search term
+      
+      // Filter data by category and search term
+      function filterData(data, category, search) {
+        let filteredData = {};
+        
+        // First filter by category
+        if (category === 'all') {
+          filteredData = {...data}; // Clone all data
+        } else if (data[category]) {
+          filteredData[category] = {...data[category]};
+        }
+        
+        // Then filter by search term if needed
+        if (search) {
+          for (const categoryName in filteredData) {
+            const categoryAlbums = filteredData[categoryName];
+            const filteredAlbums = {};
+            
+            // Only keep albums that match the search term
+            for (const albumId in categoryAlbums) {
+              const album = categoryAlbums[albumId];
+              if (album.title.toLowerCase().includes(search)) {
+                filteredAlbums[albumId] = album;
+              }
+            }
+            
+            // Replace with filtered albums
+            filteredData[categoryName] = filteredAlbums;
+            
+            // Remove empty categories
+            if (Object.keys(filteredAlbums).length === 0) {
+              delete filteredData[categoryName];
+            }
+          }
+        }
+        
+        return filteredData;
+      }
+      
+      // Calculate total pages based on filtered data
+      function calculateTotalPages(data) {
+        let totalAlbums = 0;
+        
+        // Count all albums in the filtered data
+        for (const category in data) {
+          if (data.hasOwnProperty(category)) {
+            totalAlbums += Object.keys(data[category]).length;
+          }
+        }
+        
+        return Math.max(1, Math.ceil(totalAlbums / ITEMS_PER_PAGE));
+      }
+      
+      // Display pagination controls
+      function displayPagination() {
+        const paginationElement = document.getElementById('pagination');
+        paginationElement.innerHTML = '';
+        
+        // Previous button
+        const prevItem = document.createElement('li');
+        prevItem.classList.add('page-item');
+        if (currentPage === 1) {
+          prevItem.classList.add('disabled');
+        }
+        
+        const prevLink = document.createElement('a');
+        prevLink.classList.add('page-link');
+        prevLink.href = '#';
+        prevLink.innerHTML = '&laquo;';
+        prevLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (currentPage > 1) {
+            currentPage--;
+            const filteredData = filterData(allData, currentCategory, searchTerm);
+            displayAlbums(filteredData);
+          }
+        });
+        
+        prevItem.appendChild(prevLink);
+        paginationElement.appendChild(prevItem);
+        
+        // Page numbers
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, startPage + 4);
+        
+        for (let i = startPage; i <= endPage; i++) {
+          const pageItem = document.createElement('li');
+          pageItem.classList.add('page-item');
+          if (i === currentPage) {
+            pageItem.classList.add('active');
+          }
+          
+          const pageLink = document.createElement('a');
+          pageLink.classList.add('page-link');
+          pageLink.href = '#';
+          pageLink.textContent = i;
+          pageLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            currentPage = i;
+            const filteredData = filterData(allData, currentCategory, searchTerm);
+            displayAlbums(filteredData);
+          });
+          
+          pageItem.appendChild(pageLink);
+          paginationElement.appendChild(pageItem);
+        }
+        
+        // Next button
+        const nextItem = document.createElement('li');
+        nextItem.classList.add('page-item');
+        if (currentPage === totalPages) {
+          nextItem.classList.add('disabled');
+        }
+        
+        const nextLink = document.createElement('a');
+        nextLink.classList.add('page-link');
+        nextLink.href = '#';
+        nextLink.innerHTML = '&raquo;';
+        nextLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (currentPage < totalPages) {
+            currentPage++;
+            const filteredData = filterData(allData, currentCategory, searchTerm);
+            displayAlbums(filteredData);
+          }
+        });
+        
+        nextItem.appendChild(nextLink);
+        paginationElement.appendChild(nextItem);
+      }
+      
+      // Display category navigation
+      function displayCategoryNav(data) {
+        const categoryNav = document.getElementById('category-nav').querySelector('ul');
+        const firstItem = categoryNav.querySelector('li'); // Keep the "All Categories" item
+        
+        // Clear existing category links except the first one
+        while (categoryNav.children.length > 1) {
+          categoryNav.removeChild(categoryNav.lastChild);
+        }
+        
+        // Add category links
+        for (const category in data) {
+          if (data.hasOwnProperty(category)) {
+            const li = document.createElement('li');
+            li.classList.add('nav-item');
+            
+            const a = document.createElement('a');
+            a.classList.add('nav-link');
+            if (category === currentCategory) {
+              a.classList.add('active');
+            }
+            a.href = '#';
+            a.setAttribute('data-category', category);
+            a.textContent = category;
+            
+            a.addEventListener('click', (e) => {
+              e.preventDefault();
+              
+              // Update active class
+              document.querySelectorAll('#category-nav .nav-link').forEach(link => {
+                link.classList.remove('active');
+              });
+              e.target.classList.add('active');
+              
+              // Change category and reset page
+              currentCategory = e.target.getAttribute('data-category');
+              currentPage = 1;
+              
+              // Apply both filters (category and search)
+              const filteredData = filterData(allData, currentCategory, searchTerm);
+              
+              // Update total pages based on filtered data
+              totalPages = calculateTotalPages(filteredData);
+              
+              // Display albums for the selected category
+              displayAlbums(filteredData);
+            });
+            
+            li.appendChild(a);
+            categoryNav.appendChild(li);
+          }
+        }
+        
+        // Set event listener for "All Categories"
+        const allCategoriesLink = categoryNav.querySelector('a[data-category="all"]');
+        allCategoriesLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          
+          // Update active class
+          document.querySelectorAll('#category-nav .nav-link').forEach(link => {
+            link.classList.remove('active');
+          });
+          e.target.classList.add('active');
+          
+          // Change category and reset page
+          currentCategory = 'all';
+          currentPage = 1;
+          
+          // Apply both filters (category and search)
+          const filteredData = filterData(allData, 'all', searchTerm);
+          
+          // Update total pages
+          totalPages = calculateTotalPages(filteredData);
+          
+          // Display all albums
+          displayAlbums(filteredData);
+        });
+      }
+      
+      // Display albums with pagination
+      function displayAlbums(data) {
+        isLoading = true;
+        const albumContainer = document.getElementById('album-container');
+        const loader = document.getElementById('loader');
+        
+        // Show loader
+        loader.style.display = 'flex';
+        
+        // Clear the album container
+        albumContainer.innerHTML = '';
+        
+        // Calculate start and end indices for pagination
+        let currentAlbumCount = 0;
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE;
+        
+        // Check if we have any results that match the search criteria
+        let hasResults = false;
+        if (searchTerm) {
+          for (const categoryName in data) {
+            if (data.hasOwnProperty(categoryName)) {
+              const categoryAlbums = data[categoryName];
+              for (const albumId in categoryAlbums) {
+                if (categoryAlbums[albumId].title.toLowerCase().includes(searchTerm)) {
+                  hasResults = true;
+                  break;
+                }
+              }
+              if (hasResults) break;
+            }
+          }
+          
+          // Show "no results" message if needed
+          if (!hasResults) {
+            albumContainer.innerHTML = `
+              <div class="col-12 text-center mt-4">
+                <div class="alert alert-info">
+                  <i class="bi bi-info-circle"></i> 
+                  No albums found matching "${searchTerm}". Try adjusting your search.
+                </div>
+              </div>
+            `;
+            
+            // Hide loader and update pagination
+            loader.style.display = 'none';
+            isLoading = false;
+            displayPagination();
+            return;
+          }
+        }
+        
+        // Process each category
+        for (const categoryName in data) {
+          if (!data.hasOwnProperty(categoryName)) continue;
+          
+          const categoryAlbums = data[categoryName];
+          if (!categoryAlbums || typeof categoryAlbums !== 'object') continue;
+          
+          let categoryAdded = false;
+          let categoryRow = null;
+          
+          // Process albums in the category
+          for (const albumId in categoryAlbums) {
+            if (!categoryAlbums.hasOwnProperty(albumId)) continue;
+            
+            const album = categoryAlbums[albumId];
+            if (!album || !album.title || !Array.isArray(album.preview) || !album.link) continue;
+            
+            // Skip albums that are not in the current page range
+            if (currentAlbumCount < startIndex || currentAlbumCount >= endIndex) {
+              currentAlbumCount++;
+              continue;
+            }
+            
+            // Create category header and row if not already added
+            if (!categoryAdded) {
+              // Create category header
+              const categoryHeader = document.createElement('div');
+              categoryHeader.classList.add('category-header');
+              categoryHeader.textContent = categoryName;
+              albumContainer.appendChild(categoryHeader);
+              
+              // Create row for category albums
+              categoryRow = document.createElement('div');
+              categoryRow.classList.add('row');
+              albumContainer.appendChild(categoryRow);
+              
+              categoryAdded = true;
+            }
+            
+            // Create album element
+            const albumCol = createAlbumElement(categoryName, albumId, album);
+            categoryRow.appendChild(albumCol);
+            
+            currentAlbumCount++;
+          }
+        }
+        
+        // Update pagination
+        displayPagination();
+        
+        // Initialize carousels
+        initCarousels();
+        
+        // Hide loader after a short delay
+        setTimeout(() => {
+          loader.style.display = 'none';
+          isLoading = false;
+        }, 500); // Short delay for smoother UX
+      }
+      
+      // Create an album element
+      function createAlbumElement(categoryName, albumId, album) {
+        // Create the album structure
+        const albumCol = document.createElement('div');
+        albumCol.classList.add('col-md-6', 'col-lg-4', 'mb-4');
+        
+        const albumDiv = document.createElement('div');
+        albumDiv.classList.add('album');
+        
+        const albumContent = document.createElement('div');
+        albumContent.classList.add('album-content');
+        
+        // Title
+        const title = document.createElement('h3');
+        title.classList.add('album-title');
+        title.textContent = album.title;
+        albumContent.appendChild(title);
+        
+        // Create carousel container
+        const carouselContainer = document.createElement('div');
+        carouselContainer.classList.add('carousel-container');
+        
+        // Create carousel for preview images
+        const carouselId = `carousel-${categoryName.replace(/\s+/g, '-')}-${albumId}`;
+        const carouselDiv = document.createElement('div');
+        carouselDiv.id = carouselId;
+        carouselDiv.classList.add('carousel', 'slide');
+        carouselDiv.setAttribute('data-bs-ride', 'carousel');
+        
+        // Carousel indicators
+        const indicatorsDiv = document.createElement('div');
+        indicatorsDiv.classList.add('carousel-indicators');
+        
+        // Carousel inner to hold slides
+        const carouselInner = document.createElement('div');
+        carouselInner.classList.add('carousel-inner');
+        
+        // Add images to carousel
+        album.preview.forEach((src, index) => {
+          // Skip invalid image sources
+          if (!src) return;
+          
+          // Create indicator button
+          const indicator = document.createElement('button');
+          indicator.setAttribute('type', 'button');
+          indicator.setAttribute('data-bs-target', `#${carouselId}`);
+          indicator.setAttribute('data-bs-slide-to', index);
+          if (index === 0) {
+            indicator.classList.add('active');
+          }
+          indicatorsDiv.appendChild(indicator);
+          
+          // Create slide
+          const slide = document.createElement('div');
+          slide.classList.add('carousel-item');
+          if (index === 0) {
+            slide.classList.add('active');
+          }
+          
+          const img = document.createElement('img');
+          img.src = src;
+          img.classList.add('d-block');
+          img.alt = `Preview Image ${index + 1}`;
+          
+          slide.appendChild(img);
+          carouselInner.appendChild(slide);
+        });
+        
+        // Add controls to carousel
+        const prevControl = document.createElement('button');
+        prevControl.classList.add('carousel-control-prev');
+        prevControl.setAttribute('type', 'button');
+        prevControl.setAttribute('data-bs-target', `#${carouselId}`);
+        prevControl.setAttribute('data-bs-slide', 'prev');
+        prevControl.innerHTML = `
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        `;
+        
+        const nextControl = document.createElement('button');
+        nextControl.classList.add('carousel-control-next');
+        nextControl.setAttribute('type', 'button');
+        nextControl.setAttribute('data-bs-target', `#${carouselId}`);
+        nextControl.setAttribute('data-bs-slide', 'next');
+        nextControl.innerHTML = `
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        `;
+        
+        // Assemble carousel
+        carouselDiv.appendChild(indicatorsDiv);
+        carouselDiv.appendChild(carouselInner);
+        carouselDiv.appendChild(prevControl);
+        carouselDiv.appendChild(nextControl);
+        
+        carouselContainer.appendChild(carouselDiv);
+        albumContent.appendChild(carouselContainer);
+        
+        // Link to Content
+        const footerDiv = document.createElement('div');
+        footerDiv.classList.add('album-footer');
+        
+        // Handle multiple links from the array
+        if (album.link && album.link.length > 0) {
+          album.link.forEach((linkUrl, index) => {
+            const link = document.createElement('a');
+            link.href = linkUrl;
+            link.classList.add('drive-link');
+            link.innerHTML = `<i class="bi bi-link-45deg"></i> Link ${index + 1}`;
+            link.target = '_blank';
+            footerDiv.appendChild(link);
+          });
+        }
+        
+        albumContent.appendChild(footerDiv);
+        
+        // Add content to album and album to column
+        albumDiv.appendChild(albumContent);
+        albumCol.appendChild(albumDiv);
+        
+        return albumCol;
+      }
+      
+      // Initialize carousels
+      function initCarousels() {
+        const carousels = document.querySelectorAll('.carousel');
+        carousels.forEach((carousel) => {
+          new bootstrap.Carousel(carousel, {
+            interval: 5000,
+            pause: 'hover',
+          });
+        });
+      }
+      
+      // Fetch data from the Django backend
+      function fetchAndDisplayData() {
+        const loader = document.getElementById('loader');
+        loader.style.display = 'flex';
+        
+        fetch('/scrape-data-of')
+          .then((response) => response.json())
+          .then((data) => {
+            // Store all data
+            allData = data;
+            
+            // Calculate total pages
+            const filteredData = filterData(allData, currentCategory, searchTerm);
+            totalPages = calculateTotalPages(filteredData);
+            
+            // Display category navigation
+            displayCategoryNav(data);
+            
+            // Display first page of albums (unfiltered initially)
+            searchTerm = ''; // Reset search term
+            document.getElementById('search-input').value = ''; // Clear search box
+            displayAlbums(filteredData);
+          }).catch((error) => {
+            console.error('Error fetching data: ', error);
+            const albumContainer = document.getElementById('album-container');
+            albumContainer.innerHTML = `
+              <div class="col-12 text-center">
+                <div class="alert alert-danger">
+                  <i class="bi bi-exclamation-triangle"></i> 
+                  Error loading albums. ${error.message}. Please check your connection to the server.
+                </div>
+              </div>
+            `;
+            loader.style.display = 'none';
+          });
+      }
+      
+      // Search functionality
+      document.getElementById('search-input').addEventListener('input', function(e) {
+        searchTerm = e.target.value.toLowerCase().trim();
+        currentPage = 1; // Reset to first page when searching
+        
+        // Apply both filters (category and search)
+        const filteredData = filterData(allData, currentCategory, searchTerm);
+        
+        // Update total pages based on filtered data
+        totalPages = calculateTotalPages(filteredData);
+        
+        // Display filtered albums
+        displayAlbums(filteredData);
+      });
+      
+      // Initialize the page
+      document.addEventListener('DOMContentLoaded', () => {
+        fetchAndDisplayData();
+      });
+    </script>
+  </body>
+</html>

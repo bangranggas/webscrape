@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>OF Search</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary-color: #d62976; /* Instagram Pink */
+        --secondary-color: #4f5bd5; /* Blue purple */
+        --accent-color: #feda75; /* Yellow */
+        --dark-color: #333333;
+        --light-color: #f4f4f4;
+        --secondary-color-rgb: 79, 91, 213;
+      }
+
+      body {
+        background-color: #e9ecef;
+        padding-top: 76px;
+        font-family: 'Roboto', Arial, sans-serif;
+        color: var(--dark-color);
+      }
+      .album {
+        margin-bottom: 20px;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        background-color: white;
+        transition: all 0.4s ease;
+        height: auto;
+        min-height: 450px;
+        display: flex;
+        flex-direction: column;
+        border: 2px solid var(--light-color);
+      }
+
+      .album:hover {
+        transform: scale(1.03);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.18);
+      }
+
+      .album-content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+      .album-title {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 15px;
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-bottom: 4px solid var(--accent-color);
+      }
+
+      .image-container {
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .image-container img {
+        width: 100%;
+        height: auto;
+        max-height: 350px;
+        object-fit: contain;
+      }
+
+      .album-footer {
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: var(--light-color);
+      }
+
+      .content-link {
+        background-color: var(--secondary-color);
+        color: white;
+        padding: 10px 25px;
+        border-radius: 25px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        margin-bottom: 10px;
+        width: 80%;
+        justify-content: center;
+      }
+
+      .content-link:hover {
+        background-color: var(--accent-color);
+        transform: translateY(-3px);
+        color: var(--dark-color);
+      }
+
+      .content-link i {
+        margin-right: 10px;
+      }
+
+      .page-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        text-align: center;
+        padding: 40px 0;
+        margin-bottom: 30px;
+        margin-top: 20px;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      .page-header h1 {
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 15px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .page-header .lead {
+        font-weight: 300;
+        font-size: 1.2rem;
+        opacity: 0.9;
+      }
+
+      .navbar {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+      }
+
+      .nav-link {
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+        padding: 0.5rem 1rem;
+        margin: 0 0.2rem;
+        border-radius: 4px;
+        transition: all 0.3s;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .nav-link:hover,
+      .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+      }
+
+      .mb-4 {
+        margin-bottom: 1rem !important;
+      }
+
+      /* Pagination styles */
+      .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin: 30px 0;
+      }
+
+      .pagination {
+        background-color: white;
+        border-radius: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .page-item .page-link {
+        color: var(--dark-color);
+        border: none;
+        font-weight: 500;
+        padding: 10px 20px;
+        transition: all 0.3s ease;
+      }
+
+      .page-item.active .page-link {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+      }
+
+      .page-item .page-link:hover {
+        background-color: var(--light-color);
+        color: var(--dark-color);
+      }
+
+      /* Loader styles */
+      .loader-container {
+        display: flex;
+        justify-content: center;
+        margin: 30px 0;
+      }
+
+      .loader {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Search input */
+      .search-container {
+        margin-bottom: 30px;
+      }
+
+      .search-input {
+        border-radius: 30px;
+        padding: 10px 20px;
+        border: 2px solid var(--light-color);
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      }
+
+      .search-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+      <div class="container">
+        <a
+          class="navbar-brand"
+          href="#"
+        >
+          <i class="bi bi-collection-play me-2"></i> <span style="font-weight: bold">My Collection</span>
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div
+          class="collapse navbar-collapse"
+          id="navbarNav"
+        >
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="{% url 'scraping:show_webdrive' %}"
+                >Gdrive</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="{% url 'scraping:show_webof' %}"
+                >OF</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link active"
+                aria-current="page"
+                href="{% url 'scraping:show_webofsearch' %}"
+                >OF Search</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="page-header">
+        <h1>OF Search</h1>
+        <p class="lead">Search and browse OF content</p>
+      </div>
+
+      <!-- Search Box -->
+      <div class="search-container">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input
+            type="text"
+            id="search-input"
+            class="form-control search-input"
+            placeholder="Search content by title..."
+          />
+        </div>
+      </div>
+
+      <!-- Loader -->
+      <div
+        class="loader-container"
+        id="loader"
+      >
+        <div class="loader"></div>
+      </div>
+
+      <div
+        class="row"
+        id="item-list"
+      >
+        <!-- Items will be inserted here by JavaScript -->
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-container">
+        <ul
+          class="pagination"
+          id="pagination"
+        >
+          <!-- Pagination will be inserted here by JavaScript -->
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bootstrap JavaScript and dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      // Global variables
+      const ITEMS_PER_PAGE = 9; // Number of items per page
+      let allData = []; // Store all the data
+      let filteredData = []; // Store filtered data
+      let currentPage = 1; // Current page
+      let totalPages = 1; // Total pages
+
+      // Search functionality
+      document.getElementById('search-input').addEventListener('input', function (e) {
+        const searchTerm = e.target.value.toLowerCase().trim();
+
+        if (searchTerm === '') {
+          filteredData = [...allData];
+        } else {
+          filteredData = allData.filter((item) => item.title.toLowerCase().includes(searchTerm));
+        }
+
+        // Reset to first page when searching
+        currentPage = 1;
+        totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+
+        // Display filtered items
+        displayItems(filteredData);
+      });
+
+      // Display pagination controls
+      function displayPagination() {
+        const paginationElement = document.getElementById('pagination');
+        paginationElement.innerHTML = '';
+
+        // Don't show pagination if there's only one page
+        if (totalPages <= 1) {
+          return;
+        }
+
+        // Previous button
+        const prevItem = document.createElement('li');
+        prevItem.classList.add('page-item');
+        if (currentPage === 1) {
+          prevItem.classList.add('disabled');
+        }
+
+        const prevLink = document.createElement('a');
+        prevLink.classList.add('page-link');
+        prevLink.href = '#';
+        prevLink.innerHTML = '&laquo;';
+        prevLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (currentPage > 1) {
+            currentPage--;
+            displayItems(filteredData);
+          }
+        });
+
+        prevItem.appendChild(prevLink);
+        paginationElement.appendChild(prevItem);
+
+        // Page numbers
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, startPage + 4);
+
+        for (let i = startPage; i <= endPage; i++) {
+          const pageItem = document.createElement('li');
+          pageItem.classList.add('page-item');
+          if (i === currentPage) {
+            pageItem.classList.add('active');
+          }
+
+          const pageLink = document.createElement('a');
+          pageLink.classList.add('page-link');
+          pageLink.href = '#';
+          pageLink.textContent = i;
+          pageLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            currentPage = i;
+            displayItems(filteredData);
+          });
+
+          pageItem.appendChild(pageLink);
+          paginationElement.appendChild(pageItem);
+        }
+
+        // Next button
+        const nextItem = document.createElement('li');
+        nextItem.classList.add('page-item');
+        if (currentPage === totalPages) {
+          nextItem.classList.add('disabled');
+        }
+
+        const nextLink = document.createElement('a');
+        nextLink.classList.add('page-link');
+        nextLink.href = '#';
+        nextLink.innerHTML = '&raquo;';
+        nextLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (currentPage < totalPages) {
+            currentPage++;
+            displayItems(filteredData);
+          }
+        });
+
+        nextItem.appendChild(nextLink);
+        paginationElement.appendChild(nextItem);
+      }
+
+      // Display items with pagination
+      function displayItems(data) {
+        const itemList = document.getElementById('item-list');
+        const loader = document.getElementById('loader');
+
+        // Show loader
+        loader.style.display = 'flex';
+
+        // Clear the item list
+        itemList.innerHTML = '';
+
+        // Calculate start and end indices for pagination
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, data.length);
+
+        // Get current page data
+        const currentPageData = data.slice(startIndex, endIndex);
+
+        if (currentPageData.length === 0) {
+          // No items found
+          itemList.innerHTML = `
+            <div class="col-12 text-center mt-4">
+              <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> 
+                No content found. Try adjusting your search.
+              </div>
+            </div>
+          `;
+        } else {
+          // Process items for current page
+          currentPageData.forEach((item) => {
+            // Create item element
+            const itemCol = createItemElement(item);
+            itemList.appendChild(itemCol);
+          });
+        }
+
+        // Update pagination
+        displayPagination();
+
+        // Hide loader after a short delay for smoother UX
+        setTimeout(() => {
+          loader.style.display = 'none';
+        }, 500);
+      }
+
+      // Create an item element
+      function createItemElement(item) {
+        // Create the item structure
+        const itemCol = document.createElement('div');
+        itemCol.classList.add('col-md-6', 'col-lg-4', 'mb-4');
+
+        const albumDiv = document.createElement('div');
+        albumDiv.classList.add('album');
+
+        const albumContent = document.createElement('div');
+        albumContent.classList.add('album-content');
+
+        // Title
+        const title = document.createElement('h3');
+        title.classList.add('album-title');
+        title.textContent = item.title;
+
+        albumContent.appendChild(title);
+
+        // Image container
+        const imageContainer = document.createElement('div');
+        imageContainer.classList.add('image-container');
+
+        // Image
+        if (item.image) {
+          const img = document.createElement('img');
+          img.src = item.image;
+          img.alt = `Image for ${item.title}`;
+          imageContainer.appendChild(img);
+        } else {
+          // Placeholder if no image
+          const noImage = document.createElement('div');
+          noImage.classList.add('text-center', 'text-muted', 'p-5');
+          noImage.innerHTML = '<i class="bi bi-image" style="font-size: 4rem;"></i><p>No image available</p>';
+          imageContainer.appendChild(noImage);
+        }
+
+        albumContent.appendChild(imageContainer);
+
+        // Link to content
+        const footerDiv = document.createElement('div');
+        footerDiv.classList.add('album-footer');
+
+        if (item.link) {
+          const link = document.createElement('a');
+          link.href = item.link;
+          link.classList.add('content-link');
+          link.innerHTML = `<i class="bi bi-link-45deg"></i> View Content`;
+          link.target = '_blank';
+          footerDiv.appendChild(link);
+        } else {
+          // Fallback if no link
+          const noLink = document.createElement('p');
+          noLink.classList.add('text-center', 'text-muted', 'mt-3');
+          noLink.textContent = 'No link available';
+          footerDiv.appendChild(noLink);
+        }
+
+        albumContent.appendChild(footerDiv);
+
+        // Add content to album and album to column
+        albumDiv.appendChild(albumContent);
+        itemCol.appendChild(albumDiv);
+
+        return itemCol;
+      }
+
+      // Main function to fetch and display data
+      function fetchAndDisplayData() {
+        const loader = document.getElementById('loader');
+        loader.style.display = 'flex';
+
+        fetch('/scrape-search-data')
+          .then((response) => response.json())
+          .then((data) => {
+            // Transform data from object to array for easier manipulation
+            allData = Object.entries(data).map(([id, item]) => ({
+              id,
+              ...item,
+            }));
+
+            // Initialize filtered data
+            filteredData = [...allData];
+
+            // Calculate total pages
+            totalPages = Math.ceil(allData.length / ITEMS_PER_PAGE);
+
+            // Display first page of items
+            displayItems(filteredData);
+          })
+          .catch((error) => {
+            console.error('Error fetching data: ', error);
+            const itemList = document.getElementById('item-list');
+            itemList.innerHTML = `
+              <div class="col-12 text-center">
+                <div class="alert alert-danger">
+                  <i class="bi bi-exclamation-triangle"></i> 
+                  Error loading content. Please check your connection to the server.
+                </div>
+              </div>
+            `;
+            loader.style.display = 'none';
+          });
+      }
+
+      // Initialize the page
+      document.addEventListener('DOMContentLoaded', () => {
+        fetchAndDisplayData();
+      });
+    </script>
+  </body>
+</html>
