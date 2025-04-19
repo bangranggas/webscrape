@@ -180,7 +180,7 @@ def scrape_of_data_json(request):
 
 def scrape_of_search_data():
     # Mengirimkan permintaan HTTP ke halaman
-    url = "https://docs.google.com/document/d/145DaDkBaGr9B3XxsC8ICvhcUyr1uVwNw3eAOCM37_lE/mobilebasic"  # Ganti dengan URL yang sesuai
+    url = "https://docs.google.com/document/d/1HTC847zYHuwPmui2-p0h0-PD5HQ0v27MQpWLlZE9SgI/mobilebasic"  # Ganti dengan URL yang sesuai
     response = requests.get(url)
     
     # Pastikan encoding sesuai
