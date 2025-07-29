@@ -1,9 +1,14 @@
-import html
-from django.shortcuts import render
-from bs4 import BeautifulSoup
+import time
 import requests
+from bs4 import BeautifulSoup
+from collections import defaultdict
+from django.shortcuts import render
 from django.http import JsonResponse
 
+# Menggunakan requests.Session untuk efisiensi
+session = requests.Session()
+
+# View untuk menampilkan halaman web
 def show_webdrive(request):    
     return render(request, "drivepage.html")
 
@@ -13,240 +18,227 @@ def show_webof(request):
 def show_webofsearch(request):    
     return render(request, "ofsearchpage.html")
 
+# Fungsi untuk scraping data dari halaman Google Docs (Drive)
 def scrape_drive_data():
-    # Mengirimkan permintaan HTTP ke halaman Google Docs
-    url = "https://docs.google.com/document/d/1OWaQG-gZwuypDHS0ssmfSSkdm_iLIqEYO1YmauWx54k/mobilebasic"
-    response = requests.get(url)
-    
-    # Pastikan encoding sesuai
-    response.encoding = response.apparent_encoding or 'utf-8'
-    
-    # Parse HTML dengan BeautifulSoup
-    soup = BeautifulSoup(response.text, "html.parser")
+    start_time = time.time()
 
-    # Ambil semua elemen <h3>, <img> untuk setiap album
+    url = "https://docs.google.com/document/d/1OWaQG-gZwuypDHS0ssmfSSkdm_iLIqEYO1YmauWx54k/mobilebasic"
+    response = session.get(url)
+    response.encoding = response.apparent_encoding or 'utf-8'
+
+    fetch_time = time.time()
+    print(f"[scrape_drive_data] HTTP GET: {fetch_time - start_time:.2f}s")
+
+    # Menggunakan lxml sebagai parser
+    soup = BeautifulSoup(response.text, "lxml")
+
+    parse_time = time.time()
+    print(f"[scrape_drive_data] Parse HTML: {parse_time - fetch_time:.2f}s")
+
     albums = {}
     album_count = 1
 
+    # Mencari semua elemen <h3>, <img>, dan <a> dalam satu pass
     h3_elements = soup.find_all("h3")
+    img_elements = soup.find_all("img")
+    a_elements = soup.find_all("a")
 
-    # Mengiterasi setiap judul album (h3)
-    for i, h3 in enumerate(h3_elements):
-        # Mengambil judul album
-        album_title = h3.get_text(strip=True)
-        
-        # Mencari semua elemen <img> yang terkait dengan judul ini
-        # Ambil 2 gambar setelah h3 ini, tetapi sebelum h3 berikutnya atau akhir dokumen
+    # Mapping h3 ke gambar dan link terkait
+    h3_to_images = defaultdict(list)
+    h3_to_links = defaultdict(list)
+
+    # Mengambil gambar dan link terkait dengan h3
+    img_index = 0
+    for h3 in h3_elements:
         preview_images = []
-        current_element = h3.next_sibling
-        
-        # Cari 2 gambar
-        img_count = 0
-        while current_element and img_count < 2:
-            if current_element.name == "img":
-                preview_images.append(current_element.get('src', 'No Image'))
-                img_count += 1
-            # Berhenti jika menemukan h3 berikutnya
-            elif current_element.name == "h3":
-                break
-            current_element = current_element.next_sibling
-        
-        # Jika tidak menemukan cukup gambar, cari lebih spesifik
-        if len(preview_images) < 2:
-            # Cari 2 gambar terdekat setelah h3 ini
-            next_imgs = soup.find_all("img")
-            start_idx = 0
-            for idx, img in enumerate(next_imgs):
-                if img.find_previous("h3") == h3:
-                    start_idx = idx
-                    break
-            
-            # Ambil 2 gambar dari posisi ini
-            if start_idx + 1 < len(next_imgs):
-                preview_images = [
-                    next_imgs[start_idx].get('src', 'No Image'),
-                    next_imgs[start_idx + 1].get('src', 'No Image')
-                ]
-        
-        # Cari semua link <a> yang terkait dengan judul ini
-        # Link dianggap terkait jika h3 terdekat di atasnya adalah judul ini
-        album_links = []
-        
-        # Temukan h3 berikutnya (jika ada)
-        next_h3 = h3.find_next("h3")
-        
-        # Cari semua link setelah h3 ini dan sebelum h3 berikutnya
-        current_link = h3.find_next("a")
-        while current_link and (next_h3 is None or current_link.sourceline < next_h3.sourceline):
-            link_text = current_link.get_text(strip=True)
-            if link_text:  # Pastikan link memiliki teks
-                album_links.append(link_text)
-            current_link = current_link.find_next("a")
-        
-        # Jika tidak ada link yang ditemukan dengan cara di atas
-        # Coba cara alternatif berdasarkan hubungan previous h3
-        if not album_links:
-            for link in soup.find_all("a"):
-                if link.find_previous("h3") == h3:
-                    link_text = link.get_text(strip=True)
-                    if link_text and link_text not in album_links:
-                        album_links.append(link_text)
-        
-        # Menyusun album dalam format yang sesuai
+        while img_index < len(img_elements) and len(preview_images) < 2:
+            preview_images.append(img_elements[img_index].get('src', 'No Image'))
+            img_index += 1
+        h3_to_images[h3] = preview_images
+
+    # Mengambil link terkait dengan h3
+    for a in a_elements:
+        parent_h3 = a.find_previous("h3")
+        if parent_h3:
+            h3_to_links[parent_h3].append(a.get_text(strip=True))
+
+    # Menyusun album dari data yang telah dikumpulkan
+    for h3 in h3_elements:
+        album_title = h3.get_text(strip=True)
+        preview_images = h3_to_images[h3]
+        album_links = h3_to_links[h3]
+
         albums[album_count] = {
             "title": album_title,
             "preview": preview_images,
-            "links": album_links  # Menyimpan semua link
+            "links": album_links
         }
-        
         album_count += 1
+
+    build_time = time.time()
+    print(f"[scrape_drive_data] Build result: {build_time - parse_time:.2f}s")
+    print(f"[scrape_drive_data] Total time: {build_time - start_time:.2f}s")
 
     return albums
 
+# Fungsi untuk mengembalikan data scrape dalam format JSON
 def scrape_drive_data_json(request):
-    # Panggil fungsi scrape_local_data untuk mendapatkan data
+    # Panggil fungsi scrape_drive_data untuk mendapatkan data
     scraped_data = scrape_drive_data()
 
     # Kembalikan data dalam format JSON menggunakan JsonResponse
     return JsonResponse(scraped_data)
 
+# Fungsi untuk scraping data dari halaman Google Docs (OF)
 def scrape_of_data():
-    # Mengirimkan permintaan HTTP ke halaman lokal
-    url = "https://docs.google.com/document/d/1v_0v4Xe9twegffXujhDz1Mx5Lha9dlOtdIIZ-eGK-mU/mobilebasic"
-    response = requests.get(url)
-    
-    # Pastikan encoding sesuai
-    response.encoding = response.apparent_encoding or 'utf-8'
-    
-    # Parse HTML dengan BeautifulSoup
-    soup = BeautifulSoup(response.text, "html.parser")
+    start_time = time.time()
 
-    # Ambil semua elemen <h2>, <h3>, <img>, dan <a> untuk setiap album
+    url = "https://docs.google.com/document/d/1v_0v4Xe9twegffXujhDz1Mx5Lha9dlOtdIIZ-eGK-mU/mobilebasic"
+    response = session.get(url)
+    response.encoding = response.apparent_encoding or 'utf-8'
+
+    fetch_time = time.time()
+    print(f"[scrape_of_data] HTTP GET: {fetch_time - start_time:.2f}s")
+
+    # Menggunakan lxml sebagai parser
+    soup = BeautifulSoup(response.text, "lxml")
+
+    parse_time = time.time()
+    print(f"[scrape_of_data] Parse HTML: {parse_time - fetch_time:.2f}s")
+
     categories = {}
-    current_category = None
     album_count = 1
 
-    h2_elements = soup.find_all("h2")  # Mengambil kategori
-    h3_elements = soup.find_all("h3")  # Mengambil judul album
-    img_elements = soup.find_all("img")  # Mengambil gambar preview
-    a_elements = soup.find_all("a")  # Mengambil link menuju album drive
+    # Mencari semua elemen <h2>, <h3>, <img>, dan <a> dalam satu pass
+    h2_elements = soup.find_all("h2")
+    h3_list = []
+    img_elements = soup.find_all("img")
+    a_elements = soup.find_all("a")
 
-    album_index = 0  # Mengindeks album untuk kategori yang sedang diproses
+    # Mapping h3 ke gambar dan link terkait
+    h3_to_images = defaultdict(list)
+    h3_to_links = defaultdict(list)
 
-    # Mengiterasi elemen <h2> (kategori) dan mencari album di bawah kategori tersebut
-    for i in range(len(h2_elements)):
-        category_name = h2_elements[i].get_text(strip=True)
+    # Mengambil gambar dan link terkait dengan h3
+    img_index = 0
+    for h3 in soup.find_all("h3"):
+        preview_images = []
+        while img_index < len(img_elements) and len(preview_images) < 2:
+            preview_images.append(img_elements[img_index].get('src', 'No Image'))
+            img_index += 1
+        h3_to_images[h3] = preview_images
+
+    # Mengambil link terkait dengan h3
+    for a in a_elements:
+        parent_h3 = a.find_previous("h3")
+        if parent_h3:
+            h3_to_links[parent_h3].append(a.get_text(strip=True))
+
+    # Menyusun kategori dan album dari data yang telah dikumpulkan
+    category_map = defaultdict(list)
+    for h3 in soup.find_all("h3"):
+        parent_h2 = h3.find_previous("h2")
+        if parent_h2:
+            category_map[parent_h2].append(h3)
+
+    # Menyusun kategori dan album
+    for h2 in h2_elements:
+        category_name = h2.get_text(strip=True)
         categories[category_name] = {}
 
-        # Mengambil album untuk kategori ini
-        album_start = album_index
-        while album_index < len(h3_elements) and (h3_elements[album_index].find_previous("h2") == h2_elements[i]):
-            # Mengambil data dari elemen-elemen
-            album_title = h3_elements[album_index].get_text(strip=True)
+        for h3 in category_map[h2]:
+            album_title = h3.get_text(strip=True)
 
-            # Cek apakah ada cukup gambar untuk album ini (2 gambar per album)
-            preview_images = []
-            # Pastikan ada cukup gambar (2 gambar per album)
-            if album_index * 2 < len(img_elements):
-                preview_images.append(img_elements[album_index * 2].get('src', 'No Image'))  # Gambar 1
-            if album_index * 2 + 1 < len(img_elements):
-                preview_images.append(img_elements[album_index * 2 + 1].get('src', 'No Image'))  # Gambar 2
+            preview_images = h3_to_images.get(h3, [])
+            album_links = h3_to_links.get(h3, [])
 
-            # Mengambil semua link <a> untuk album ini
-            album_links = []
-            # Periksa semua <a> setelah <h3> yang relevan dan tambahkan ke dalam list link
-            for link in a_elements:
-                if link.find_previous("h3") == h3_elements[album_index]:
-                    album_links.append(link.get_text(strip=True))
-
-            # Menyusun album dalam format yang sesuai
             categories[category_name][album_count] = {
                 "title": album_title,
                 "preview": preview_images,
-                "link": album_links  # Menyimpan link dalam list
+                "link": album_links
             }
-
-            album_index += 1
             album_count += 1
+
+    build_time = time.time()
+    print(f"[scrape_of_data] Build result: {build_time - parse_time:.2f}s")
+    print(f"[scrape_of_data] Total time: {build_time - start_time:.2f}s")
 
     return categories
 
+# Fungsi untuk mengembalikan data scrape OF dalam format JSON
 def scrape_of_data_json(request):
-    # Panggil fungsi scrape_local_data untuk mendapatkan data
+    # Panggil fungsi scrape_of_data untuk mendapatkan data
     scraped_data = scrape_of_data()
 
     # Kembalikan data dalam format JSON menggunakan JsonResponse
     return JsonResponse(scraped_data)
 
+# Fungsi untuk scraping data pencarian OF
 def scrape_of_search_data():
-    # Mengirimkan permintaan HTTP ke halaman
-    url = "https://docs.google.com/document/d/1HTC847zYHuwPmui2-p0h0-PD5HQ0v27MQpWLlZE9SgI/mobilebasic"  # Ganti dengan URL yang sesuai
-    response = requests.get(url)
-    
-    # Pastikan encoding sesuai
-    response.encoding = response.apparent_encoding or 'utf-8'
-    
-    # Parse HTML dengan BeautifulSoup
-    soup = BeautifulSoup(response.text, "html.parser")
+    start_time = time.time()
 
-    # Ambil semua elemen <h2> untuk judul
+    url = "https://docs.google.com/document/d/1HTC847zYHuwPmui2-p0h0-PD5HQ0v27MQpWLlZE9SgI/mobilebasic"
+    response = session.get(url)
+    response.encoding = response.apparent_encoding or 'utf-8'
+
+    fetch_time = time.time()
+    print(f"[scrape_of_search_data] HTTP GET: {fetch_time - start_time:.2f}s")
+
+    # Menggunakan lxml sebagai parser
+    soup = BeautifulSoup(response.text, "lxml")
+
+    parse_time = time.time()
+    print(f"[scrape_of_search_data] Parse HTML: {parse_time - fetch_time:.2f}s")
+
     titles = {}
     item_count = 1
 
+    # Mencari semua elemen <h2> dan <p> dalam satu pass
     h2_elements = soup.find_all("h2")
+    p_elements = soup.find_all("p")
 
-    # Mengiterasi setiap judul (h2)
+    # Mapping p untuk IMG dan link ke h2
+    h2_to_img_link = {}
+    h2_to_page_link = {}
+
+    # Mengambil gambar dan link terkait dengan h2
+    for p in p_elements:
+        if "IMG :" in p.get_text():
+            img_text = p.get_text()
+            img_parts = img_text.split("IMG :")
+            if len(img_parts) > 1:
+                h2 = p.find_previous("h2")
+                if h2:
+                    h2_to_img_link[h2] = img_parts[1].strip()
+
+        if "IMG :" not in p.get_text():
+            a_tag = p.find("span")
+            if a_tag:
+                page_link = a_tag.get_text(strip=True)
+                h2 = p.find_previous("h2")
+                if h2:
+                    h2_to_page_link[h2] = page_link
+
+    # Menyusun data dari h2
     for h2 in h2_elements:
-        # Mengambil judul
         title = h2.get_text(strip=True)
-        
-        # Mencari elemen <p> setelah h2 yang berisi "IMG :"
-        img_link = None
-        current_element = h2.next_sibling
-        
-        while current_element and not img_link:
-            if current_element.name == "p" and "IMG :" in current_element.get_text():
-                # Ambil link gambar (teks setelah "IMG :")
-                img_text = current_element.get_text()
-                img_parts = img_text.split("IMG :")
-                if len(img_parts) > 1:
-                    img_link = img_parts[1].strip()
-            
-            # Berhenti jika menemukan h2 berikutnya
-            elif current_element.name == "h2":
-                break
-                
-            current_element = current_element.next_sibling
-        
-        # Mencari elemen <a> setelah h2 ini dan sebelum h2 berikutnya
-        page_link = None
-        current_element = h2.next_sibling
-        
-        while current_element and not page_link:
-            if current_element.name == "p" and "IMG :" not in current_element.get_text():
-                a_tag = current_element.find("span")
-                if a_tag:
-                    # Ambil teks dari tag <a>, bukan href
-                    page_link = a_tag.get_text()
-                    break
-            
-            # Berhenti jika menemukan h2 berikutnya
-            elif current_element.name == "h2":
-                break
-                
-            current_element = current_element.next_sibling
-        
-        # Menyusun data dalam format yang sesuai
+        img_link = h2_to_img_link.get(h2, None)
+        page_link = h2_to_page_link.get(h2, None)
+
         titles[item_count] = {
             "title": title,
             "image": img_link,
             "link": page_link
         }
-        
         item_count += 1
+
+    build_time = time.time()
+    print(f"[scrape_of_search_data] Build result: {build_time - parse_time:.2f}s")
+    print(f"[scrape_of_search_data] Total time: {build_time - start_time:.2f}s")
 
     return titles
 
+# Fungsi untuk mengembalikan data pencarian OF dalam format JSON
 def scrape_of_search_data_json(request):
     # Panggil fungsi scrape_of_search_data untuk mendapatkan data
     scraped_data = scrape_of_search_data()
