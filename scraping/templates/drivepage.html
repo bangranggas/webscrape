@@ -187,8 +187,8 @@
       </div>
 
       <!-- Decorative elements -->
-      <div class="absolute top-0 -right-4 w-72 h-72 bg-green-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow"></div>
-      <div class="absolute top-0 -left-4 w-72 h-72 bg-emerald-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow"></div>
+      <div class="-z-10 absolute top-0 -right-4 w-72 h-72 bg-green-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow"></div>
+      <div class="-z-10 absolute top-0 -left-4 w-72 h-72 bg-emerald-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow"></div>
     </div>
 
     <!-- Filters and Search Info -->
@@ -229,7 +229,17 @@
             </div>
 
             <!-- Image Carousel Container -->
-            <div class="relative h-64 sm:h-72 image-container" x-data="{ currentSlide: 0 }">
+            <div
+              class="relative h-80 sm:h-96 image-container"
+              x-data="{ 
+    currentSlide: 0, 
+    startAutoSlide() {
+        this.autoSlideInterval = setInterval(() => {
+            this.currentSlide = (this.currentSlide + 1) % this.album.preview.length;
+        }, 5000);
+    },
+}"
+              x-init="startAutoSlide">
               <template x-for="(image, index) in album.preview" :key="index">
                 <div
                   x-show="currentSlide === index"
@@ -353,28 +363,22 @@
           totalPages: 1,
 
           // Initialize app
-          init() {
-            this.loadSampleData();
-            setTimeout(() => {
-              this.loading = false;
-              this.applyFilters();
-            }, 5000); // Quick loading for demonstration
-          },
-
-          // Load data with your structure
-          loadSampleData() {
-            // This will be replaced with actual API call to /scrape-data-gdrive
-            this.fetchDataFromBackend();
+          async init() {
+            this.loading = true;
+            await this.fetchDataFromBackend();
+            this.loading = false;
+            this.applyFilters();
           },
 
           // Fetch data from backend (replace sample data when API is ready)
-          fetchDataFromBackend() {
-            fetch('/scrape-data-drive')
-              .then((response) => response.json())
-              .then((data) => this.processBackendData(data))
-              .catch((error) => {
-                console.error('Error fetching data:', error);
-              });
+          async fetchDataFromBackend() {
+            try {
+              const response = await fetch('/scrape-data-drive');
+              const data = await response.json();
+              this.processBackendData(data); // Process the data once it's fetched
+            } catch (error) {
+              console.error('Error fetching data:', error);
+            }
           },
 
           // Process the backend data structure (flat structure, no categories)

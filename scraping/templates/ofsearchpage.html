@@ -187,8 +187,8 @@
       </div>
 
       <!-- Decorative elements -->
-      <div class="absolute top-0 -right-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow"></div>
-      <div class="absolute top-0 -left-4 w-72 h-72 bg-fuchsia-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow"></div>
+      <div class="-z-10 absolute top-0 -right-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow"></div>
+      <div class="-z-10 absolute top-0 -left-4 w-72 h-72 bg-fuchsia-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow"></div>
     </div>
 
     <!-- Filters and Search Info -->
@@ -362,28 +362,22 @@
           totalPages: 1,
 
           // Initialize app
-          init() {
-            this.loadSampleData();
-            setTimeout(() => {
-              this.loading = false;
-              this.applyFilters();
-            }, 5000); // Quick loading for demonstration
-          },
-
-          // Load data with your structure
-          loadSampleData() {
-            // This will be replaced with actual API call to /scrape-data-ofcustom
-            this.fetchDataFromBackend();
+          async init() {
+            this.loading = true;
+            await this.fetchDataFromBackend();
+            this.loading = false;
+            this.applyFilters();
           },
 
           // Fetch data from backend (replace sample data when API is ready)
-          fetchDataFromBackend() {
-            fetch('/scrape-data-custom')
-              .then((response) => response.json())
-              .then((data) => this.processBackendData(data))
-              .catch((error) => {
-                console.error('Error fetching data:', error);
-              });
+          async fetchDataFromBackend() {
+            try {
+              const response = await fetch('/scrape-data-custom');
+              const data = await response.json();
+              this.processBackendData(data); // Process the data once it's fetched
+            } catch (error) {
+              console.error('Error fetching data:', error);
+            }
           },
 
           // Process the backend data structure (flat structure, single image per album, no categories)
