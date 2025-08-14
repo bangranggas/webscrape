@@ -247,7 +247,7 @@
                   x-transition:enter-start="opacity-0 transform scale-95"
                   x-transition:enter-end="opacity-100 transform scale-100"
                   class="absolute inset-0">
-                  <img :src="image" :alt="`${album.title} - Image ${index + 1}`" class="w-full h-full object-contain bg-gray-100" onerror="this.src='https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=Image+Not+Found'" />
+                  <img :src="image" :alt="`${album.title} - Image ${index + 1}`" class="w-full h-full object-contain bg-gray-100" onerror="this.src='https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=Image+Not+Found'" loading="lazy" />
                 </div>
               </template>
 
